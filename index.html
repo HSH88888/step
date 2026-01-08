@@ -11,6 +11,8 @@
             font-weight: normal; font-style: normal;
         }
 
+        * { box-sizing: border-box; }
+
         body {
             margin: 0; padding: 0; 
             background-color: #333;
@@ -37,104 +39,109 @@
         .pointer-auto { pointer-events: auto; }
         .hidden { display: none !important; }
 
-        /* 로비 화면 */
+        /* 로비 화면 - 모바일 최적화 */
         .lobby-screen {
             background-color: #bce0ff; z-index: 100;
             display: flex; flex-direction: column; align-items: center;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .lobby-header {
-            width: 100%; padding: 15px; box-sizing: border-box;
+            width: 100%; padding: 10px 15px; 
             display: flex; justify-content: space-between; align-items: center;
+            flex-shrink: 0;
         }
         
         .leaderboard-btn {
-            background: rgba(255,215,0,0.9); padding: 8px 15px; border-radius: 4px;
-            border: 2px solid #000; color: #000; font-size: 14px;
+            background: rgba(255,215,0,0.9); padding: 6px 12px; border-radius: 4px;
+            border: 2px solid #000; color: #000; font-size: 12px;
             cursor: pointer; box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
             font-family: 'DungGeunMo', monospace;
         }
         .leaderboard-btn:active { transform: translate(2px, 2px); box-shadow: none; }
         
         .currency-group {
-            display: flex; gap: 10px;
+            display: flex; gap: 8px;
         }
         
         .currency-pill {
-            background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 4px;
-            color: #fff; font-size: 14px; display: flex; align-items: center; gap: 5px;
+            background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px;
+            color: #fff; font-size: 12px; display: flex; align-items: center; gap: 4px;
             box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
         }
 
         .game-logo {
-            margin-top: 20px; text-align: center;
+            margin-top: 10px; text-align: center;
             transform: rotate(-3deg);
-            animation: floatLogo 3s infinite ease-in-out;
+            flex-shrink: 0;
         }
-        @keyframes floatLogo { 0%,100%{transform:rotate(-3deg) translateY(0);} 50%{transform:rotate(-3deg) translateY(-10px);} }
         
         .logo-text {
-            font-size: 70px; color: #ffce00;
-            -webkit-text-stroke: 4px #0044cc;
-            text-shadow: 5px 5px 0 #000;
+            font-size: 48px; color: #ffce00;
+            -webkit-text-stroke: 3px #0044cc;
+            text-shadow: 4px 4px 0 #000;
             line-height: 1.1;
         }
 
-        /* 커스터마이징 영역 */
+        /* 커스터마이징 영역 - 높이 축소 */
         .custom-area {
             flex: 1; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; gap: 15px;
-            width: 100%;
+            justify-content: center; align-items: center; gap: 8px;
+            width: 100%; padding: 10px 0;
+            min-height: 0;
         }
 
         .preview-canvas {
-            width: 150px; height: 150px;
-            border: 4px solid #000;
-            border-radius: 10px;
+            width: 100px; height: 100px;
+            border: 3px solid #000;
+            border-radius: 8px;
             background: rgba(255,255,255,0.5);
-            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
             image-rendering: pixelated;
         }
 
         .selector-box {
             background: rgba(255,255,255,0.8);
-            border: 4px solid #000; border-radius: 10px;
-            padding: 10px; width: 80%; max-width: 400px;
+            border: 3px solid #000; border-radius: 8px;
+            padding: 8px; width: 85%; max-width: 350px;
             display: flex; flex-direction: column; align-items: center;
-            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
         }
-        .selector-label { font-size: 14px; color: #555; margin-bottom: 5px; }
+        .selector-label { font-size: 12px; color: #555; margin-bottom: 4px; }
         .selector-row {
             display: flex; justify-content: space-between; align-items: center;
-            width: 100%; margin-bottom: 10px;
+            width: 100%; margin-top: 6px;
         }
         .arrow-btn {
             background: #ff5e57; border: 2px solid #000; color: white;
-            width: 40px; height: 40px; font-size: 20px; cursor: pointer;
+            width: 36px; height: 36px; font-size: 18px; cursor: pointer;
             display: flex; justify-content: center; align-items: center;
             box-shadow: 2px 2px 0 #000;
+            flex-shrink: 0;
         }
         .arrow-btn:active { transform: translate(2px, 2px); box-shadow: none; }
-        .selection-name { font-size: 20px; font-weight: bold; color: #333; min-width: 100px; text-align: center; }
+        .selection-name { font-size: 16px; font-weight: bold; color: #333; min-width: 80px; text-align: center; }
 
         .lobby-footer {
-            width: 100%; max-width: 600px; padding: 20px; box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 15px;
+            width: 100%; max-width: 600px; padding: 12px 15px; 
+            display: flex; flex-direction: column; gap: 10px;
             background: linear-gradient(to top, rgba(0,0,0,0.2), transparent);
+            flex-shrink: 0;
         }
 
         .start-btn {
-            width: 100%; padding: 15px;
+            width: 100%; padding: 12px;
             background: #ff9f43; border: 4px solid #000;
-            font-size: 36px; color: #fff;
+            font-size: 28px; color: #fff;
             text-shadow: 3px 3px 0 #000; cursor: pointer;
-            box-shadow: 6px 6px 0 #c65f12; transition: transform 0.1s;
+            box-shadow: 5px 5px 0 #c65f12; transition: transform 0.1s;
         }
-        .start-btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #c65f12; }
+        .start-btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 #c65f12; }
 
         /* 인게임 HUD */
         .hud-area {
-            width: 100%; padding: 15px; box-sizing: border-box;
+            width: 100%; padding: 15px; 
             display: flex; flex-direction: column; align-items: center;
             position: relative;
         }
@@ -190,38 +197,38 @@
         }
         
         .gameover-title {
-            font-size: 60px;
+            font-size: 50px;
             color: #ff4d4d;
-            text-shadow: 6px 6px 0 #b32400;
+            text-shadow: 5px 5px 0 #b32400;
             font-family: 'DungGeunMo', monospace;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             letter-spacing: 2px;
         }
 
         .gameover-stats {
             text-align: center;
-            font-size: 24px;
+            font-size: 20px;
             color: #ffffff;
             text-shadow: 2px 2px 0 #000;
             line-height: 1.6;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         .stat-value { color: #ffd700; }
 
         .retry-btn {
             background: #ffffff;
             border: 4px solid #000;
-            padding: 15px 70px;
+            padding: 12px 60px;
             font-family: 'DungGeunMo', monospace;
-            font-size: 30px;
+            font-size: 26px;
             color: #000;
             cursor: pointer;
-            box-shadow: 10px 10px 0 #000;
+            box-shadow: 8px 8px 0 #000;
             transition: transform 0.1s;
         }
         .retry-btn:active {
             transform: translate(4px, 4px);
-            box-shadow: 6px 6px 0 #000;
+            box-shadow: 4px 4px 0 #000;
         }
         
         /* 이름 입력 모달 */
@@ -231,47 +238,46 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: #fff;
-            border: 6px solid #000;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 10px 10px 0 rgba(0,0,0,0.5);
+            border: 5px solid #000;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
             z-index: 300;
             text-align: center;
             max-width: 90%;
-            width: 350px;
+            width: 320px;
         }
         
         .modal-title {
-            font-size: 28px;
+            font-size: 24px;
             color: #ff9f43;
             text-shadow: 2px 2px 0 #000;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .modal-subtitle {
-            font-size: 16px;
+            font-size: 14px;
             color: #555;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .name-input {
             width: 100%;
-            padding: 12px;
-            font-size: 20px;
+            padding: 10px;
+            font-size: 18px;
             font-family: 'DungGeunMo', monospace;
             border: 3px solid #000;
             border-radius: 5px;
-            box-sizing: border-box;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
         }
         
         .submit-name-btn {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #4bcffa;
             border: 3px solid #000;
-            font-size: 24px;
+            font-size: 20px;
             font-family: 'DungGeunMo', monospace;
             color: #fff;
             text-shadow: 2px 2px 0 #000;
@@ -290,8 +296,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .leaderboard-header {
@@ -300,22 +307,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .leaderboard-title {
-            font-size: 48px;
+            font-size: 36px;
             color: #ffd700;
-            text-shadow: 4px 4px 0 #000;
+            text-shadow: 3px 3px 0 #000;
         }
         
         .close-leaderboard-btn {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             background: #ff5e57;
             border: 3px solid #000;
             border-radius: 10px;
-            font-size: 30px;
+            font-size: 26px;
             color: #fff;
             cursor: pointer;
             display: flex;
@@ -332,18 +339,18 @@
             width: 100%;
             max-width: 600px;
             background: rgba(255,255,255,0.95);
-            border: 5px solid #000;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
+            border: 4px solid #000;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.3);
         }
         
         .leaderboard-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            border-bottom: 3px solid #ddd;
+            padding: 12px;
+            border-bottom: 2px solid #ddd;
             transition: background 0.2s;
         }
         
@@ -362,9 +369,9 @@
         }
         
         .rank-badge {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
-            min-width: 50px;
+            min-width: 45px;
             text-align: center;
         }
         
@@ -375,23 +382,23 @@
         
         .player-info {
             flex: 1;
-            padding: 0 15px;
+            padding: 0 12px;
         }
         
         .player-name {
-            font-size: 20px;
+            font-size: 18px;
             color: #333;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         
         .player-details {
-            font-size: 14px;
+            font-size: 12px;
             color: #666;
         }
         
         .player-score {
-            font-size: 32px;
+            font-size: 28px;
             color: #ff9f43;
             font-weight: bold;
             text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
@@ -399,9 +406,27 @@
         
         .empty-leaderboard {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             color: #999;
-            font-size: 18px;
+            font-size: 16px;
+        }
+        
+        /* 모바일 최적화 */
+        @media (max-height: 700px) {
+            .logo-text { font-size: 40px; -webkit-text-stroke: 2px #0044cc; }
+            .game-logo { margin-top: 5px; }
+            .preview-canvas { width: 80px; height: 80px; }
+            .selector-box { padding: 6px; }
+            .selector-label { font-size: 11px; }
+            .selection-name { font-size: 14px; }
+            .start-btn { font-size: 24px; padding: 10px; }
+            .lobby-footer { padding: 10px 15px; }
+        }
+        
+        @media (max-height: 600px) {
+            .logo-text { font-size: 36px; }
+            .custom-area { gap: 6px; padding: 5px 0; }
+            .preview-canvas { width: 70px; height: 70px; }
         }
         
         @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
@@ -429,7 +454,7 @@
         <div class="custom-area">
             <div class="selector-box">
                 <div class="selector-label">캐릭터 선택</div>
-                <canvas id="charPreview" class="preview-canvas" width="150" height="150"></canvas>
+                <canvas id="charPreview" class="preview-canvas" width="100" height="100"></canvas>
                 <div class="selector-row">
                     <button class="arrow-btn" onclick="changeCharacter(-1)">◀</button>
                     <div class="selection-name" id="charNameDisplay">회사원</div>
@@ -439,7 +464,7 @@
 
             <div class="selector-box">
                 <div class="selector-label">배경 선택</div>
-                <canvas id="bgPreview" class="preview-canvas" width="150" height="150"></canvas>
+                <canvas id="bgPreview" class="preview-canvas" width="100" height="100"></canvas>
                 <div class="selector-row">
                     <button class="arrow-btn" onclick="changeBackground(-1)">◀</button>
                     <div class="selection-name" id="bgNameDisplay">도시 야경</div>
@@ -492,7 +517,7 @@
         
         <button class="retry-btn" onclick="startGame()">RETRY</button>
         
-        <button class="home-btn" style="position: static; margin-top: 30px; width: 50px; height: 50px;" onclick="goToLobby()">🏠</button>
+        <button class="home-btn" style="position: static; margin-top: 20px; width: 45px; height: 45px;" onclick="goToLobby()">🏠</button>
     </div>
 
     <!-- 이름 입력 모달 -->
@@ -584,9 +609,8 @@
     function checkNewRecord(score, level, coins) {
         const leaderboard = loadLeaderboard();
         
-        // 10등 안에 드는지 확인
         if (leaderboard.length < 10) {
-            return true; // 10개 미만이면 무조건 등록 가능
+            return true;
         }
         
         const lowestScore = leaderboard[leaderboard.length - 1].score;
@@ -620,10 +644,7 @@
             date: date
         });
         
-        // 점수 순으로 정렬 (내림차순)
         leaderboard.sort((a, b) => b.score - a.score);
-        
-        // 상위 10개만 유지
         const top10 = leaderboard.slice(0, 10);
         saveLeaderboard(top10);
         
@@ -707,14 +728,12 @@
         
         document.getElementById('nameInputModal').classList.add('hidden');
         
-        // 순위표로 자동 이동
         setTimeout(() => {
             showLeaderboard();
             displayLeaderboard(recordId);
         }, 300);
     };
 
-    // 엔터키로 이름 제출
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Enter' && !document.getElementById('nameInputModal').classList.contains('hidden')) {
             submitName();
@@ -866,16 +885,16 @@
     }
 
     // ==========================================
-    // 프리뷰 업데이트
+    // 프리뷰 업데이트 (축소된 크기)
     // ==========================================
     function updateCharacterPreview() {
         const preview = document.getElementById('charPreview');
         const pctx = preview.getContext('2d');
-        pctx.clearRect(0, 0, 150, 150);
+        pctx.clearRect(0, 0, 100, 100);
         
         pctx.save();
-        pctx.translate(75, 100);
-        pctx.scale(3, 3);
+        pctx.translate(50, 70);
+        pctx.scale(2.5, 2.5);
         drawPlayerShape(pctx, CHARACTERS[state.charIdx].id, true);
         pctx.restore();
     }
@@ -885,36 +904,36 @@
         const pctx = preview.getContext('2d');
         
         const bg = BACKGROUNDS[state.bgIdx];
-        const grad = pctx.createLinearGradient(0, 0, 0, 150);
+        const grad = pctx.createLinearGradient(0, 0, 0, 100);
         grad.addColorStop(0, bg.top);
         grad.addColorStop(1, bg.bot);
         pctx.fillStyle = grad;
-        pctx.fillRect(0, 0, 150, 150);
+        pctx.fillRect(0, 0, 100, 100);
         
         if(bg.id === 'NIGHT') {
             pctx.fillStyle = '#1a2530';
-            pctx.fillRect(10, 80, 30, 70);
-            pctx.fillRect(50, 60, 40, 90);
-            pctx.fillRect(100, 90, 35, 60);
+            pctx.fillRect(5, 55, 20, 45);
+            pctx.fillRect(30, 40, 25, 60);
+            pctx.fillRect(65, 60, 25, 40);
             pctx.fillStyle = '#f9c74f';
-            for(let y=90; y<140; y+=10) {
-                for(let x=15; x<35; x+=10) {
-                    if(Math.random()>0.3) pctx.fillRect(x, y, 3, 4);
+            for(let y=60; y<95; y+=8) {
+                for(let x=8; x<22; x+=8) {
+                    if(Math.random()>0.3) pctx.fillRect(x, y, 2, 3);
                 }
             }
         } else if(bg.id === 'SUNSET') {
             pctx.fillStyle = '#ffd700';
             pctx.beginPath();
-            pctx.arc(75, 75, 30, 0, Math.PI*2);
+            pctx.arc(50, 50, 20, 0, Math.PI*2);
             pctx.fill();
         }
         
         pctx.fillStyle = 'rgba(255,255,255,0.6)';
         pctx.beginPath();
-        pctx.arc(30, 30, 15, 0, Math.PI*2);
+        pctx.arc(20, 20, 10, 0, Math.PI*2);
         pctx.fill();
         pctx.beginPath();
-        pctx.arc(110, 50, 20, 0, Math.PI*2);
+        pctx.arc(75, 30, 13, 0, Math.PI*2);
         pctx.fill();
     }
 
@@ -976,7 +995,6 @@
         document.getElementById('finalCoins').innerText = state.sessionCoins;
         document.getElementById('gameOverUI').classList.remove('hidden');
         
-        // 신기록 체크
         if (checkNewRecord(state.score, state.level, state.sessionCoins)) {
             const rank = getRankPosition(state.score);
             setTimeout(() => {
