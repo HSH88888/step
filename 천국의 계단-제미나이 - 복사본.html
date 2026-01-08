@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Infinite Stairs - Photo Match</title>
+    <style>
+        /* 폰트: 둥근모 (픽셀 한글 폰트) */
+        @font-face {
+            font-family: 'DungGeunMo';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+            font-weight: normal; font-style: normal;
+        }
+
+        body {
+            margin: 0; padding: 0; 
+            background-color: #333;
+            font-family: 'DungGeunMo', monospace;
+            width: 100vw; height: 100vh;
+            overflow: hidden; touch-action: none;
+            user-select: none; -webkit-user-select: none;
+        }
+
+        #game-container {
+            position: relative; width: 100%; height: 100%;
+            background-color: #2c3e50;
+            overflow: hidden;
+        }
+
+        canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+
+        /* UI 레이어 공통 */
+        .ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: flex; flex-direction: column; justify-content: space-between;
+            z-index: 10;
+        }
+        .pointer-auto { pointer-events: auto; }
+        .hidden { display: none !important; }
+
+        /* [1] 로비 화면 */
+        .lobby-screen {
+            background-color: #bce0ff; z-index: 100;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .lobby-header {
+            width: 100%; padding: 15px; box-sizing: border-box;
+            display: flex; justify-content: flex-end; gap: 10px;
+        }
+        .currency-pill {
+            background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 4px;
+            color: #fff; font-size: 14px; display: flex; align-items: center; gap: 5px;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+        }
+
+        .game-logo {
+            margin-top: 20px; text-align: center;
+            transform: rotate(-3deg);
+            animation: floatLogo 3s infinite ease-in-out;
+        }
+        @keyframes floatLogo { 0%,100%{transform:rotate(-3deg) translateY(0);} 50%{transform:rotate(-3deg) translateY(-10px);} }
+        
+        .logo-text {
+            font-size: 70px; color: #ffce00;
+            -webkit-text-stroke: 4px #0044cc;
+            text-shadow: 5px 5px 0 #000;
+            line-height: 1.1;
+        }
+
+        /* 커스터마이징 영역 */
+        .custom-area {
+            flex: 1; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; gap: 15px;
+            width: 100%;
+        }
+
+        .selector-box {
+            background: rgba(255,255,255,0.8);
+            border: 4px solid #000; border-radius: 10px;
+            padding: 10px; width: 80%; max-width: 400px;
+            display: flex; flex-direction: column; align-items: center;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+        }
+        .selector-label { font-size: 14px; color: #555; margin-bottom: 5px; }
+        .selector-row {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%;
+        }
+        .arrow-btn {
+            background: #ff5e57; border: 2px solid #000; color: white;
+            width: 40px; height: 40px; font-size: 20px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 2px 2px 0 #000;
+        }
+        .arrow-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+        .selection-name { font-size: 20px; font-weight: bold; color: #333; min-width: 100px; text-align: center; }
+
+        .lobby-footer {
+            width: 100%; max-width: 600px; padding: 20px; box-sizing: border-box;
+            display: flex; flex-direction: column; gap: 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.2), transparent);
+        }
+
+        .start-btn {
+            width: 100%; padding: 15px;
+            background: #ff9f43; border: 4px solid #000;
+            font-size: 36px; color: #fff;
+            text-shadow: 3px 3px 0 #000; cursor: pointer;
+            box-shadow: 6px 6px 0 #c65f12; transition: transform 0.1s;
+        }
+        .start-btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #c65f12; }
+
+
+        /* [2] 인게임 HUD */
+        .hud-area {
+            width: 100%; padding: 15px; box-sizing: border-box;
+            display: flex; flex-direction: column; align-items: center;
+            position: relative;
+        }
+
+        .home-btn {
+            position: absolute; top: 15px; left: 15px;
+            width: 50px; height: 50px; background: #fff;
+            border: 3px solid #000; border-radius: 10px;
+            font-size: 24px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 3px 3px 0 #000; pointer-events: auto;
+        }
+        .home-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+
+        .timer-frame {
+            width: 100%; max-width: 400px; height: 16px;
+            background: #333; border: 3px solid #000;
+            margin-bottom: 5px; position: relative; margin-top: 10px;
+        }
+        .timer-fill {
+            width: 100%; height: 100%; background: #00ff00;
+            transition: width 0.1s linear;
+        }
+
+        .info-row { display: flex; gap: 15px; align-items: flex-end; text-shadow: 2px 2px 0 #000; }
+        .level-text { font-size: 24px; color: #ffd700; animation: pulse 2s infinite; }
+        .score-text { font-size: 40px; color: #fff; }
+
+        /* 컨트롤 버튼 */
+        .controls-area {
+            display: flex; justify-content: center; gap: 30px;
+            padding-bottom: 40px; pointer-events: auto;
+        }
+        .control-btn {
+            width: 110px; height: 110px; border-radius: 20px;
+            border: 4px solid #000;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; background: #fff;
+        }
+        .control-btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
+        .btn-turn { background: #ff5e57; }
+        .btn-climb { background: #4bcffa; }
+        .btn-icon { font-size: 36px; color: #fff; text-shadow: 2px 2px 0 #000; margin-bottom: 5px; }
+        .btn-label { font-size: 16px; color: #fff; text-shadow: 2px 2px 0 #000; }
+
+        /* [3] 게임 오버 화면 (사진 참고 수정됨) */
+        .gameover-screen {
+            background-color: rgba(33, 45, 59, 0.95); /* 사진의 짙은 청회색 배경 */
+            z-index: 200;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        
+        /* TIME OVER 텍스트 스타일 */
+        .gameover-title {
+            font-size: 60px;
+            color: #ff4d4d; /* 밝은 빨강 */
+            text-shadow: 6px 6px 0 #b32400; /* 짙은 그림자 */
+            font-family: 'DungGeunMo', monospace;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        /* 점수 및 레벨 텍스트 */
+        .gameover-stats {
+            text-align: center;
+            font-size: 24px;
+            color: #ffffff;
+            text-shadow: 2px 2px 0 #000;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+        .stat-value { color: #ffd700; } /* 숫자는 노란색 */
+
+        /* RETRY 버튼 스타일 (사진 참고) */
+        .retry-btn {
+            background: #ffffff;
+            border: 4px solid #000;
+            padding: 15px 70px;
+            font-family: 'DungGeunMo', monospace;
+            font-size: 30px;
+            color: #000;
+            cursor: pointer;
+            box-shadow: 10px 10px 0 #000; /* 짙은 하드 그림자 */
+            transition: transform 0.1s;
+        }
+        .retry-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: 6px 6px 0 #000;
+        }
+        
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="lobbyUI" class="ui-layer lobby-screen pointer-auto">
+        <div class="lobby-header">
+            <div class="currency-pill">💰 3,000</div>
+            <div class="currency-pill">💎 50</div>
+        </div>
+
+        <div class="game-logo">
+            <div class="logo-text">무한의<br>계단</div>
+        </div>
+
+        <div class="custom-area">
+            <div class="selector-box">
+                <div class="selector-label">캐릭터 선택</div>
+                <div class="selector-row">
+                    <button class="arrow-btn" onclick="changeCharacter(-1)">◀</button>
+                    <div class="selection-name" id="charNameDisplay">회사원</div>
+                    <button class="arrow-btn" onclick="changeCharacter(1)">▶</button>
+                </div>
+            </div>
+
+            <div class="selector-box">
+                <div class="selector-label">배경 선택</div>
+                <div class="selector-row">
+                    <button class="arrow-btn" onclick="changeBackground(-1)">◀</button>
+                    <div class="selection-name" id="bgNameDisplay">도시 야경</div>
+                    <button class="arrow-btn" onclick="changeBackground(1)">▶</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lobby-footer">
+            <button class="start-btn" onclick="startGame()">게임 시작</button>
+        </div>
+    </div>
+
+    <div id="gameUI" class="ui-layer hidden">
+        <div class="hud-area">
+            <button class="home-btn" onclick="goToLobby()">🏠</button>
+
+            <div class="timer-frame">
+                <div class="timer-fill" id="timerBar"></div>
+            </div>
+            <div class="info-row">
+                <div class="level-text">LV.<span id="levelDisplay">1</span></div>
+                <div class="score-text" id="scoreDisplay">0</div>
+            </div>
+        </div>
+
+        <div class="controls-area">
+            <button class="control-btn btn-turn" ontouchstart="handleInput('TURN')" onmousedown="handleInput('TURN')">
+                <div class="btn-icon">↺</div>
+                <div class="btn-label">방향전환</div>
+            </button>
+            <button class="control-btn btn-climb" ontouchstart="handleInput('CLIMB')" onmousedown="handleInput('CLIMB')">
+                <div class="btn-icon">⇗</div>
+                <div class="btn-label">오르기</div>
+            </button>
+        </div>
+    </div>
+
+    <div id="gameOverUI" class="ui-layer gameover-screen hidden pointer-auto">
+        <div class="gameover-title">TIME OVER</div>
+        
+        <div class="gameover-stats">
+            <div>SCORE: <span class="stat-value" id="finalScore">0</span></div>
+            <div>LEVEL: <span class="stat-value" id="finalLevel">1</span></div>
+        </div>
+        
+        <button class="retry-btn" onclick="startGame()">RETRY</button>
+        
+        <button class="home-btn" style="position: static; margin-top: 30px; width: 50px; height: 50px;" onclick="goToLobby()">🏠</button>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 데이터 및 설정
+    // ==========================================
+    const CONFIG = {
+        STAIR: { WIDTH: 100, HEIGHT: 50, VISIBLE: 25 },
+        PLAYER: { SCALE: 2.5, SPEED: 0.4 },
+        LEVEL: { STEPS: 100, START_TIME: 60, TIME_DEC: 2, MIN_TIME: 15, REFILL: 5 }
+    };
+
+    const CHARACTERS = [
+        { id: 'MAN', name: '회사원' },
+        { id: 'RABBIT', name: '토끼' },
+        { id: 'DOG', name: '강아지' }
+    ];
+
+    const BACKGROUNDS = [
+        { id: 'NIGHT', name: '도시 야경', top: '#0f0c29', bot: '#302b63' },
+        { id: 'DAY', name: '맑은 낮', top: '#2980b9', bot: '#6dd5fa' },
+        { id: 'SUNSET', name: '노을', top: '#ff512f', bot: '#dd2476' }
+    ];
+
+    // ==========================================
+    // 변수
+    // ==========================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let state = {
+        status: 'LOBBY',
+        score: 0,
+        level: 1,
+        timeMax: 60,
+        timeCur: 100,
+        charIdx: 0, 
+        bgIdx: 0    
+    };
+
+    let player = { gX: 0, gY: 0, vX: 0, vY: 0, dir: -1, jumpY: 0 };
+    let camera = { x: 0, y: 0 };
+    let stairs = [];
+    let bgObjects = []; 
+
+    // ==========================================
+    // 초기화 및 이벤트
+    // ==========================================
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        generateBackgroundObjects();
+        if(state.status === 'LOBBY') drawLobbyCanvas(); 
+        else if(state.status === 'GAMEOVER') drawGameCanvas();
+    }
+    window.addEventListener('resize', resize);
+    
+    function goToLobby() {
+        state.status = 'LOBBY';
+        document.getElementById('gameUI').classList.add('hidden');
+        document.getElementById('gameOverUI').classList.add('hidden');
+        document.getElementById('lobbyUI').classList.remove('hidden');
+        
+        generateBackgroundObjects(); 
+        drawLobbyCanvas();
+    }
+
+    window.changeCharacter = function(dir) {
+        state.charIdx += dir;
+        if(state.charIdx < 0) state.charIdx = CHARACTERS.length - 1;
+        if(state.charIdx >= CHARACTERS.length) state.charIdx = 0;
+        document.getElementById('charNameDisplay').innerText = CHARACTERS[state.charIdx].name;
+    };
+
+    window.changeBackground = function(dir) {
+        state.bgIdx += dir;
+        if(state.bgIdx < 0) state.bgIdx = BACKGROUNDS.length - 1;
+        if(state.bgIdx >= BACKGROUNDS.length) state.bgIdx = 0;
+        document.getElementById('bgNameDisplay').innerText = BACKGROUNDS[state.bgIdx].name;
+        generateBackgroundObjects(); 
+    };
+
+    function startGame() {
+        state.status = 'PLAYING';
+        state.score = 0;
+        state.level = 1;
+        state.timeCur = 100;
+        updateDifficulty();
+
+        document.getElementById('lobbyUI').classList.add('hidden');
+        document.getElementById('gameOverUI').classList.add('hidden');
+        document.getElementById('gameUI').classList.remove('hidden');
+
+        initGameData();
+        updateUI();
+        animate();
+    }
+
+    function initGameData() {
+        player.gX = 0; player.gY = 0;
+        player.vX = 0; player.vY = 0;
+        player.dir = -1;
+        camera.x = 0; camera.y = 0;
+        stairs = [{x: 0, y: 0, color: '#fff'}];
+        for(let i=1; i<=6; i++) stairs.push({x: -i, y: -i, color: getRandomColor()});
+        for(let i=0; i<40; i++) addRandomStair();
+    }
+
+    function updateDifficulty() {
+        let t = CONFIG.LEVEL.START_TIME - (state.level - 1) * CONFIG.LEVEL.TIME_DEC;
+        state.timeMax = Math.max(CONFIG.LEVEL.MIN_TIME, t);
+    }
+
+    function getRandomColor() {
+        const c = ['#ff9ff3', '#feca57', '#ff6b6b', '#48dbfb', '#1dd1a1', '#ffffff'];
+        return c[Math.floor(Math.random() * c.length)];
+    }
+
+    function addRandomStair() {
+        const last = stairs[stairs.length - 1];
+        const prev = stairs[stairs.length - 2];
+        let dir = last.x - prev.x;
+        if (Math.random() < 0.5) dir = -dir;
+        stairs.push({ x: last.x + dir, y: last.y - 1, color: getRandomColor() });
+    }
+
+    function generateBackgroundObjects() {
+        bgObjects = [];
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const type = BACKGROUNDS[state.bgIdx].id;
+
+        if (type === 'NIGHT') {
+            let x = 0;
+            while(x < width) {
+                const w = 50 + Math.random() * 80;
+                const h = 100 + Math.random() * 300;
+                let wins = [];
+                for(let wy=height-h+20; wy<height-20; wy+=20) {
+                    for(let wx=x+10; wx<x+w-10; wx+=15) {
+                        if(Math.random()>0.3) wins.push({x:wx, y:wy});
+                    }
+                }
+                bgObjects.push({type:'BUILDING', x:x, y:height-h, w:w, h:h, color: '#1a2530', wins:wins});
+                x += w;
+            }
+        } else {
+            for(let i=0; i<10; i++) {
+                bgObjects.push({
+                    type: 'CLOUD',
+                    x: Math.random() * width,
+                    y: Math.random() * (height/2),
+                    size: 30 + Math.random() * 50,
+                    speed: 0.2 + Math.random() * 0.5
+                });
+            }
+            if(type === 'SUNSET') {
+                bgObjects.push({ type:'SUN', x: width/2, y: height/2 + 100, size: 150 });
+            }
+        }
+    }
+
+    // ==========================================
+    // 게임 로직
+    // ==========================================
+    window.handleInput = function(action) {
+        if (state.status !== 'PLAYING') return;
+        if (event && event.cancelable) event.preventDefault();
+
+        const next = stairs[state.score + 1];
+        const curr = stairs[state.score];
+        const reqDir = next.x < curr.x ? -1 : 1;
+        let success = false;
+
+        if (action === 'CLIMB' && player.dir === reqDir) success = true;
+        if (action === 'TURN') {
+            const newDir = player.dir * -1;
+            player.dir = newDir;
+            if (newDir === reqDir) success = true;
+        }
+
+        if (success) {
+            player.gX += player.dir;
+            player.gY -= 1;
+            state.score++;
+            state.timeCur = Math.min(100, state.timeCur + CONFIG.LEVEL.REFILL);
+            player.jumpY = 20; 
+            addRandomStair();
+            if (state.score > 0 && state.score % CONFIG.LEVEL.STEPS === 0) levelUp();
+            updateUI();
+        } else {
+            player.gX += player.dir;
+            gameOver();
+        }
+    };
+
+    function levelUp() {
+        state.level++;
+        updateDifficulty();
+    }
+
+    function gameOver() {
+        state.status = 'GAMEOVER';
+        document.getElementById('finalScore').innerText = state.score;
+        document.getElementById('finalLevel').innerText = state.level;
+        document.getElementById('gameOverUI').classList.remove('hidden');
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (state.status === 'PLAYING') {
+            if (e.code === 'KeyZ' || e.code === 'ArrowLeft') handleInput('TURN');
+            if (e.code === 'KeyX' || e.code === 'ArrowRight') handleInput('CLIMB');
+        } else if (state.status === 'LOBBY' || state.status === 'GAMEOVER') {
+            if (e.code === 'Space' || e.code === 'Enter') startGame();
+        }
+    });
+
+    function updateUI() {
+        document.getElementById('scoreDisplay').innerText = state.score;
+        document.getElementById('levelDisplay').innerText = state.level;
+    }
+
+    // ==========================================
+    // 렌더링
+    // ==========================================
+    function animate() {
+        if (state.status === 'LOBBY') {
+            drawLobbyCanvas();
+            requestAnimationFrame(animate);
+            return;
+        }
+        
+        updatePhysics();
+        drawGameCanvas();
+        
+        if (state.status === 'PLAYING' || state.status === 'GAMEOVER') {
+            requestAnimationFrame(animate);
+        }
+    }
+
+    function updatePhysics() {
+        if (state.status === 'PLAYING') {
+            const drain = 100 / (state.timeMax * 60);
+            state.timeCur -= drain;
+            if (state.timeCur <= 0) gameOver();
+
+            const bar = document.getElementById('timerBar');
+            bar.style.width = Math.max(0, state.timeCur) + "%";
+            if(state.timeCur < 30) bar.style.background = '#ff0000';
+            else bar.style.background = '#00ff00';
+
+            const tx = player.gX * CONFIG.STAIR.WIDTH;
+            const ty = player.gY * CONFIG.STAIR.HEIGHT;
+            player.vX += (tx - player.vX) * CONFIG.PLAYER.SPEED;
+            player.vY += (ty - player.vY) * CONFIG.PLAYER.SPEED;
+            if(player.jumpY > 0) player.jumpY -= 2;
+
+            camera.x += (player.vX - camera.x) * CONFIG.PLAYER.SPEED;
+            camera.y += (player.vY - camera.y) * CONFIG.PLAYER.SPEED;
+        } else if (state.status === 'GAMEOVER') {
+            player.vX += (player.gX * CONFIG.STAIR.WIDTH - player.vX) * 0.1;
+            player.vY += 25; 
+        }
+    }
+
+    function drawBackground(offsetY) {
+        const bg = BACKGROUNDS[state.bgIdx];
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, bg.top);
+        grad.addColorStop(1, bg.bot);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.translate(0, offsetY);
+
+        if (bg.id === 'NIGHT') {
+            for(let b of bgObjects) {
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x, b.y, b.w, b.h + 1000);
+                ctx.fillStyle = '#f9c74f';
+                for(let w of b.wins) ctx.fillRect(w.x, w.y, 6, 8);
+            }
+        } else {
+             if(bg.id === 'SUNSET') {
+                const sun = bgObjects.find(o=>o.type==='SUN');
+                if(sun) {
+                    ctx.fillStyle = '#ffd700';
+                    ctx.beginPath(); ctx.arc(sun.x, sun.y, sun.size, 0, Math.PI*2); ctx.fill();
+                }
+            }
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            for(let c of bgObjects) {
+                if(c.type === 'CLOUD') {
+                    c.x += c.speed;
+                    if(c.x > canvas.width + 50) c.x = -50;
+                    ctx.beginPath(); ctx.arc(c.x, c.y, c.size, 0, Math.PI*2); ctx.fill();
+                }
+            }
+        }
+        ctx.restore();
+    }
+
+    function drawLobbyCanvas() {
+        drawBackground(0);
+        
+        ctx.save();
+        ctx.translate(canvas.width/2, canvas.height/2 + 50);
+        ctx.scale(2, 2); 
+        
+        const bounce = Math.sin(Date.now() / 200) * 10;
+        drawPlayer(0, -bounce - 50, true);
+        ctx.restore();
+    }
+
+    function drawGameCanvas() {
+        drawBackground(camera.y * 0.2);
+
+        ctx.save();
+        const cx = canvas.width / 2;
+        const cy = canvas.height * 0.7;
+        ctx.translate(cx - camera.x, cy - camera.y);
+
+        const start = Math.max(0, state.score - 15);
+        const end = Math.min(stairs.length, state.score + CONFIG.STAIR.VISIBLE);
+
+        for (let i = start; i < end; i++) {
+            const s = stairs[i];
+            const sx = s.x * CONFIG.STAIR.WIDTH;
+            const sy = s.y * CONFIG.STAIR.HEIGHT;
+            drawStair(sx, sy, s.color, i === state.score);
+        }
+
+        drawPlayer(player.vX, player.vY - player.jumpY, false);
+        ctx.restore();
+    }
+
+    function drawStair(x, y, color, isCurrent) {
+        const w = CONFIG.STAIR.WIDTH;
+        const h = CONFIG.STAIR.HEIGHT;
+        ctx.fillStyle = isCurrent ? '#fff' : color;
+        ctx.fillRect(x - w/2, y, w, h);
+        ctx.lineWidth = 4; ctx.strokeStyle = '#000';
+        ctx.strokeRect(x - w/2, y, w, h);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(x - w/2, y + h, w, 20);
+    }
+
+    function drawPlayer(x, y, isLobby) {
+        const sc = CONFIG.PLAYER.SCALE;
+        const charType = CHARACTERS[state.charIdx].id;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(sc, sc);
+        if (!isLobby && player.dir === 1) ctx.scale(-1, 1);
+
+        if (charType === 'MAN') {
+            ctx.fillStyle = '#000044'; 
+            if(!isLobby && player.jumpY > 5) { ctx.fillRect(-6,-10,6,8); ctx.fillRect(2,-14,6,8); }
+            else { ctx.fillRect(-6,-10,5,10); ctx.fillRect(1,-10,5,10); }
+
+            ctx.fillStyle = '#fff'; ctx.fillRect(-8,-24,16,14);
+            ctx.fillStyle = '#f00'; ctx.fillRect(-1,-24,2,10);
+            ctx.fillStyle = '#ffccaa'; ctx.fillRect(-7,-34,14,10);
+            ctx.fillStyle = '#000'; ctx.fillRect(-8,-38,16,6); ctx.fillRect(-8,-32,4,2); ctx.fillRect(4,-32,4,2);
+            ctx.fillStyle = '#8b4513'; ctx.fillRect(6,-20,8,6);
+        } 
+        else if (charType === 'RABBIT') {
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(-8, -20, 16, 15);
+            if(!isLobby && player.jumpY > 5) { ctx.fillRect(-6,-5,6,5); ctx.fillRect(2,-8,6,5); }
+            else { ctx.fillRect(-6,-5,5,8); ctx.fillRect(1,-5,5,8); }
+            ctx.fillRect(-10, -32, 20, 14);
+            ctx.fillStyle = '#ffcccc';
+            ctx.fillRect(-8, -42, 4, 10); ctx.fillRect(4, -42, 4, 10);
+            ctx.fillStyle = '#000'; ctx.fillRect(-6,-28,2,2); ctx.fillRect(4,-28,2,2);
+        }
+        else if (charType === 'DOG') {
+            ctx.fillStyle = '#d35400'; 
+            ctx.fillRect(-8, -18, 16, 12);
+            if(!isLobby && player.jumpY > 5) { ctx.fillRect(-6,-6,6,6); ctx.fillRect(2,-9,6,6); }
+            else { ctx.fillRect(-6,-6,5,8); ctx.fillRect(1,-6,5,8); }
+            ctx.fillRect(-9, -30, 18, 14);
+            ctx.fillRect(-8, -34, 4, 4); ctx.fillRect(4, -34, 4, 4);
+            ctx.fillStyle = '#fff'; ctx.fillRect(-7,-24,14,6);
+            ctx.fillStyle = '#000'; ctx.fillRect(-2,-22,4,3);
+            ctx.fillRect(-6,-27,2,2); ctx.fillRect(4,-27,2,2);
+        }
+
+        ctx.restore();
+    }
+    
+    resize();
+    generateBackgroundObjects();
+</script>
+</body>
+</html>
