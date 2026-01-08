@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Infinite Stairs - Photo Match</title>
     <style>
-        /* 폰트: 둥근모 (픽셀 한글 폰트) */
         @font-face {
             font-family: 'DungGeunMo';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
@@ -17,7 +16,7 @@
             background-color: #333;
             font-family: 'DungGeunMo', monospace;
             width: 100vw; height: 100vh;
-            overflow: hidden; touch-action: none;
+            overflow: hidden; touch-action: manipulation;
             user-select: none; -webkit-user-select: none;
         }
 
@@ -29,7 +28,6 @@
 
         canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 
-        /* UI 레이어 공통 */
         .ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
@@ -39,7 +37,7 @@
         .pointer-auto { pointer-events: auto; }
         .hidden { display: none !important; }
 
-        /* [1] 로비 화면 */
+        /* 로비 화면 */
         .lobby-screen {
             background-color: #bce0ff; z-index: 100;
             display: flex; flex-direction: column; align-items: center;
@@ -47,8 +45,21 @@
         
         .lobby-header {
             width: 100%; padding: 15px; box-sizing: border-box;
-            display: flex; justify-content: flex-end; gap: 10px;
+            display: flex; justify-content: space-between; align-items: center;
         }
+        
+        .leaderboard-btn {
+            background: rgba(255,215,0,0.9); padding: 8px 15px; border-radius: 4px;
+            border: 2px solid #000; color: #000; font-size: 14px;
+            cursor: pointer; box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+            font-family: 'DungGeunMo', monospace;
+        }
+        .leaderboard-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+        
+        .currency-group {
+            display: flex; gap: 10px;
+        }
+        
         .currency-pill {
             background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 4px;
             color: #fff; font-size: 14px; display: flex; align-items: center; gap: 5px;
@@ -76,6 +87,15 @@
             width: 100%;
         }
 
+        .preview-canvas {
+            width: 150px; height: 150px;
+            border: 4px solid #000;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.5);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+            image-rendering: pixelated;
+        }
+
         .selector-box {
             background: rgba(255,255,255,0.8);
             border: 4px solid #000; border-radius: 10px;
@@ -86,7 +106,7 @@
         .selector-label { font-size: 14px; color: #555; margin-bottom: 5px; }
         .selector-row {
             display: flex; justify-content: space-between; align-items: center;
-            width: 100%;
+            width: 100%; margin-bottom: 10px;
         }
         .arrow-btn {
             background: #ff5e57; border: 2px solid #000; color: white;
@@ -112,8 +132,7 @@
         }
         .start-btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #c65f12; }
 
-
-        /* [2] 인게임 HUD */
+        /* 인게임 HUD */
         .hud-area {
             width: 100%; padding: 15px; box-sizing: border-box;
             display: flex; flex-direction: column; align-items: center;
@@ -143,6 +162,7 @@
         .info-row { display: flex; gap: 15px; align-items: flex-end; text-shadow: 2px 2px 0 #000; }
         .level-text { font-size: 24px; color: #ffd700; animation: pulse 2s infinite; }
         .score-text { font-size: 40px; color: #fff; }
+        .coin-text { font-size: 24px; color: #ffd700; }
 
         /* 컨트롤 버튼 */
         .controls-area {
@@ -162,24 +182,22 @@
         .btn-icon { font-size: 36px; color: #fff; text-shadow: 2px 2px 0 #000; margin-bottom: 5px; }
         .btn-label { font-size: 16px; color: #fff; text-shadow: 2px 2px 0 #000; }
 
-        /* [3] 게임 오버 화면 (사진 참고 수정됨) */
+        /* 게임 오버 화면 */
         .gameover-screen {
-            background-color: rgba(33, 45, 59, 0.95); /* 사진의 짙은 청회색 배경 */
+            background-color: rgba(33, 45, 59, 0.95);
             z-index: 200;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         
-        /* TIME OVER 텍스트 스타일 */
         .gameover-title {
             font-size: 60px;
-            color: #ff4d4d; /* 밝은 빨강 */
-            text-shadow: 6px 6px 0 #b32400; /* 짙은 그림자 */
+            color: #ff4d4d;
+            text-shadow: 6px 6px 0 #b32400;
             font-family: 'DungGeunMo', monospace;
             margin-bottom: 40px;
             letter-spacing: 2px;
         }
 
-        /* 점수 및 레벨 텍스트 */
         .gameover-stats {
             text-align: center;
             font-size: 24px;
@@ -188,9 +206,8 @@
             line-height: 1.6;
             margin-bottom: 40px;
         }
-        .stat-value { color: #ffd700; } /* 숫자는 노란색 */
+        .stat-value { color: #ffd700; }
 
-        /* RETRY 버튼 스타일 (사진 참고) */
         .retry-btn {
             background: #ffffff;
             border: 4px solid #000;
@@ -199,12 +216,192 @@
             font-size: 30px;
             color: #000;
             cursor: pointer;
-            box-shadow: 10px 10px 0 #000; /* 짙은 하드 그림자 */
+            box-shadow: 10px 10px 0 #000;
             transition: transform 0.1s;
         }
         .retry-btn:active {
             transform: translate(4px, 4px);
             box-shadow: 6px 6px 0 #000;
+        }
+        
+        /* 이름 입력 모달 */
+        .name-input-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border: 6px solid #000;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.5);
+            z-index: 300;
+            text-align: center;
+            max-width: 90%;
+            width: 350px;
+        }
+        
+        .modal-title {
+            font-size: 28px;
+            color: #ff9f43;
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 10px;
+        }
+        
+        .modal-subtitle {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        
+        .name-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 20px;
+            font-family: 'DungGeunMo', monospace;
+            border: 3px solid #000;
+            border-radius: 5px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .submit-name-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4bcffa;
+            border: 3px solid #000;
+            font-size: 24px;
+            font-family: 'DungGeunMo', monospace;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .submit-name-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+        
+        /* 순위표 화면 */
+        .leaderboard-screen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 250;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .leaderboard-header {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .leaderboard-title {
+            font-size: 48px;
+            color: #ffd700;
+            text-shadow: 4px 4px 0 #000;
+        }
+        
+        .close-leaderboard-btn {
+            width: 50px;
+            height: 50px;
+            background: #ff5e57;
+            border: 3px solid #000;
+            border-radius: 10px;
+            font-size: 30px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 3px 3px 0 #000;
+        }
+        .close-leaderboard-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+        
+        .leaderboard-list {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255,255,255,0.95);
+            border: 5px solid #000;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 3px solid #ddd;
+            transition: background 0.2s;
+        }
+        
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+        
+        .leaderboard-item.new-record {
+            background: #fff9c4;
+            animation: highlight 1s ease-in-out infinite;
+        }
+        
+        @keyframes highlight {
+            0%, 100% { background: #fff9c4; }
+            50% { background: #ffeb3b; }
+        }
+        
+        .rank-badge {
+            font-size: 28px;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .rank-1 { color: #ffd700; text-shadow: 2px 2px 0 #000; }
+        .rank-2 { color: #c0c0c0; text-shadow: 2px 2px 0 #000; }
+        .rank-3 { color: #cd7f32; text-shadow: 2px 2px 0 #000; }
+        .rank-other { color: #666; }
+        
+        .player-info {
+            flex: 1;
+            padding: 0 15px;
+        }
+        
+        .player-name {
+            font-size: 20px;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .player-details {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .player-score {
+            font-size: 32px;
+            color: #ff9f43;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+        }
+        
+        .empty-leaderboard {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 18px;
         }
         
         @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
@@ -215,10 +412,14 @@
 <div id="game-container">
     <canvas id="gameCanvas"></canvas>
 
+    <!-- 로비 화면 -->
     <div id="lobbyUI" class="ui-layer lobby-screen pointer-auto">
         <div class="lobby-header">
-            <div class="currency-pill">💰 3,000</div>
-            <div class="currency-pill">💎 50</div>
+            <button class="leaderboard-btn" onclick="showLeaderboard()">🏆 순위표</button>
+            <div class="currency-group">
+                <div class="currency-pill">💰 <span id="totalCoins">0</span></div>
+                <div class="currency-pill">💎 <span id="totalGems">50</span></div>
+            </div>
         </div>
 
         <div class="game-logo">
@@ -228,6 +429,7 @@
         <div class="custom-area">
             <div class="selector-box">
                 <div class="selector-label">캐릭터 선택</div>
+                <canvas id="charPreview" class="preview-canvas" width="150" height="150"></canvas>
                 <div class="selector-row">
                     <button class="arrow-btn" onclick="changeCharacter(-1)">◀</button>
                     <div class="selection-name" id="charNameDisplay">회사원</div>
@@ -237,6 +439,7 @@
 
             <div class="selector-box">
                 <div class="selector-label">배경 선택</div>
+                <canvas id="bgPreview" class="preview-canvas" width="150" height="150"></canvas>
                 <div class="selector-row">
                     <button class="arrow-btn" onclick="changeBackground(-1)">◀</button>
                     <div class="selection-name" id="bgNameDisplay">도시 야경</div>
@@ -250,6 +453,7 @@
         </div>
     </div>
 
+    <!-- 인게임 UI -->
     <div id="gameUI" class="ui-layer hidden">
         <div class="hud-area">
             <button class="home-btn" onclick="goToLobby()">🏠</button>
@@ -260,6 +464,7 @@
             <div class="info-row">
                 <div class="level-text">LV.<span id="levelDisplay">1</span></div>
                 <div class="score-text" id="scoreDisplay">0</div>
+                <div class="coin-text">💰<span id="gameCoins">0</span></div>
             </div>
         </div>
 
@@ -275,28 +480,56 @@
         </div>
     </div>
 
+    <!-- 게임 오버 화면 -->
     <div id="gameOverUI" class="ui-layer gameover-screen hidden pointer-auto">
         <div class="gameover-title">TIME OVER</div>
         
         <div class="gameover-stats">
             <div>SCORE: <span class="stat-value" id="finalScore">0</span></div>
             <div>LEVEL: <span class="stat-value" id="finalLevel">1</span></div>
+            <div>COINS: <span class="stat-value" id="finalCoins">0</span></div>
         </div>
         
         <button class="retry-btn" onclick="startGame()">RETRY</button>
         
         <button class="home-btn" style="position: static; margin-top: 30px; width: 50px; height: 50px;" onclick="goToLobby()">🏠</button>
     </div>
+
+    <!-- 이름 입력 모달 -->
+    <div id="nameInputModal" class="name-input-modal hidden pointer-auto">
+        <div class="modal-title">🎉 신기록!</div>
+        <div class="modal-subtitle">
+            <span id="rankPosition">10</span>등 달성!<br>
+            이름을 입력하세요
+        </div>
+        <input type="text" id="playerNameInput" class="name-input" maxlength="10" placeholder="이름 입력 (최대 10자)">
+        <button class="submit-name-btn" onclick="submitName()">등록</button>
+    </div>
+
+    <!-- 순위표 화면 -->
+    <div id="leaderboardUI" class="ui-layer leaderboard-screen hidden pointer-auto">
+        <div class="leaderboard-header">
+            <div class="leaderboard-title">🏆 순위표</div>
+            <button class="close-leaderboard-btn" onclick="closeLeaderboard()">✕</button>
+        </div>
+        
+        <div class="leaderboard-list" id="leaderboardList">
+            <div class="empty-leaderboard">아직 기록이 없습니다</div>
+        </div>
+    </div>
 </div>
 
 <script>
+    'use strict';
+    
     // ==========================================
     // 데이터 및 설정
     // ==========================================
     const CONFIG = {
         STAIR: { WIDTH: 100, HEIGHT: 50, VISIBLE: 25 },
         PLAYER: { SCALE: 2.5, SPEED: 0.4 },
-        LEVEL: { STEPS: 100, START_TIME: 60, TIME_DEC: 2, MIN_TIME: 15, REFILL: 5 }
+        LEVEL: { STEPS: 100, START_TIME: 120, TIME_DEC: 2, MIN_TIME: 15, REFILL: 5 },
+        COIN: { CHANCE: 0.3, VALUE: 10 }
     };
 
     const CHARACTERS = [
@@ -324,13 +557,169 @@
         timeMax: 60,
         timeCur: 100,
         charIdx: 0, 
-        bgIdx: 0    
+        bgIdx: 0,
+        sessionCoins: 0,
+        totalCoins: 0,
+        lastRecordId: null
     };
 
     let player = { gX: 0, gY: 0, vX: 0, vY: 0, dir: -1, jumpY: 0 };
     let camera = { x: 0, y: 0 };
     let stairs = [];
-    let bgObjects = []; 
+    let coins = [];
+    let bgObjects = [];
+
+    // ==========================================
+    // 로컬 스토리지 - 순위표
+    // ==========================================
+    function loadLeaderboard() {
+        const saved = localStorage.getItem('infiniteStairsLeaderboard');
+        return saved ? JSON.parse(saved) : [];
+    }
+
+    function saveLeaderboard(leaderboard) {
+        localStorage.setItem('infiniteStairsLeaderboard', JSON.stringify(leaderboard));
+    }
+
+    function checkNewRecord(score, level, coins) {
+        const leaderboard = loadLeaderboard();
+        
+        // 10등 안에 드는지 확인
+        if (leaderboard.length < 10) {
+            return true; // 10개 미만이면 무조건 등록 가능
+        }
+        
+        const lowestScore = leaderboard[leaderboard.length - 1].score;
+        return score > lowestScore;
+    }
+
+    function getRankPosition(score) {
+        const leaderboard = loadLeaderboard();
+        let rank = 1;
+        
+        for (let record of leaderboard) {
+            if (score <= record.score) {
+                rank++;
+            }
+        }
+        
+        return rank;
+    }
+
+    function addToLeaderboard(name, score, level, coins) {
+        const leaderboard = loadLeaderboard();
+        const date = new Date().toISOString().split('T')[0];
+        const id = Date.now();
+        
+        leaderboard.push({
+            id: id,
+            name: name || '무명',
+            score: score,
+            level: level,
+            coins: coins,
+            date: date
+        });
+        
+        // 점수 순으로 정렬 (내림차순)
+        leaderboard.sort((a, b) => b.score - a.score);
+        
+        // 상위 10개만 유지
+        const top10 = leaderboard.slice(0, 10);
+        saveLeaderboard(top10);
+        
+        return id;
+    }
+
+    function displayLeaderboard(highlightId = null) {
+        const leaderboard = loadLeaderboard();
+        const listContainer = document.getElementById('leaderboardList');
+        
+        if (leaderboard.length === 0) {
+            listContainer.innerHTML = '<div class="empty-leaderboard">아직 기록이 없습니다</div>';
+            return;
+        }
+        
+        let html = '';
+        leaderboard.forEach((record, index) => {
+            const rank = index + 1;
+            const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+            const isNew = record.id === highlightId ? 'new-record' : '';
+            
+            html += `
+                <div class="leaderboard-item ${isNew}">
+                    <div class="rank-badge ${rankClass}">${medal}</div>
+                    <div class="player-info">
+                        <div class="player-name">${record.name}</div>
+                        <div class="player-details">LV.${record.level} • ${record.date}</div>
+                    </div>
+                    <div class="player-score">${record.score}</div>
+                </div>
+            `;
+        });
+        
+        listContainer.innerHTML = html;
+    }
+
+    // ==========================================
+    // 로컬 스토리지 - 코인
+    // ==========================================
+    function loadSavedData() {
+        const saved = localStorage.getItem('infiniteStairsCoins');
+        if (saved) {
+            state.totalCoins = parseInt(saved) || 0;
+        }
+        updateCoinDisplay();
+    }
+
+    function saveTotalCoins() {
+        localStorage.setItem('infiniteStairsCoins', state.totalCoins);
+        updateCoinDisplay();
+    }
+
+    function updateCoinDisplay() {
+        document.getElementById('totalCoins').innerText = state.totalCoins;
+    }
+
+    // ==========================================
+    // UI 제어
+    // ==========================================
+    window.showLeaderboard = function() {
+        document.getElementById('leaderboardUI').classList.remove('hidden');
+        displayLeaderboard();
+    };
+
+    window.closeLeaderboard = function() {
+        document.getElementById('leaderboardUI').classList.add('hidden');
+    };
+
+    function showNameInputModal(rank) {
+        document.getElementById('rankPosition').innerText = rank;
+        document.getElementById('playerNameInput').value = '';
+        document.getElementById('nameInputModal').classList.remove('hidden');
+        document.getElementById('playerNameInput').focus();
+    }
+
+    window.submitName = function() {
+        const name = document.getElementById('playerNameInput').value.trim() || '무명';
+        const recordId = addToLeaderboard(name, state.score, state.level, state.sessionCoins);
+        state.lastRecordId = recordId;
+        
+        document.getElementById('nameInputModal').classList.add('hidden');
+        
+        // 순위표로 자동 이동
+        setTimeout(() => {
+            showLeaderboard();
+            displayLeaderboard(recordId);
+        }, 300);
+    };
+
+    // 엔터키로 이름 제출
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Enter' && !document.getElementById('nameInputModal').classList.contains('hidden')) {
+            submitName();
+        }
+    });
 
     // ==========================================
     // 초기화 및 이벤트
@@ -339,8 +728,11 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         generateBackgroundObjects();
-        if(state.status === 'LOBBY') drawLobbyCanvas(); 
-        else if(state.status === 'GAMEOVER') drawGameCanvas();
+        if(state.status === 'LOBBY') {
+            drawLobbyCanvas();
+            updateCharacterPreview();
+            updateBackgroundPreview();
+        } else if(state.status === 'GAMEOVER') drawGameCanvas();
     }
     window.addEventListener('resize', resize);
     
@@ -348,10 +740,14 @@
         state.status = 'LOBBY';
         document.getElementById('gameUI').classList.add('hidden');
         document.getElementById('gameOverUI').classList.add('hidden');
+        document.getElementById('nameInputModal').classList.add('hidden');
+        document.getElementById('leaderboardUI').classList.add('hidden');
         document.getElementById('lobbyUI').classList.remove('hidden');
         
-        generateBackgroundObjects(); 
+        generateBackgroundObjects();
         drawLobbyCanvas();
+        updateCharacterPreview();
+        updateBackgroundPreview();
     }
 
     window.changeCharacter = function(dir) {
@@ -359,6 +755,7 @@
         if(state.charIdx < 0) state.charIdx = CHARACTERS.length - 1;
         if(state.charIdx >= CHARACTERS.length) state.charIdx = 0;
         document.getElementById('charNameDisplay').innerText = CHARACTERS[state.charIdx].name;
+        updateCharacterPreview();
     };
 
     window.changeBackground = function(dir) {
@@ -366,7 +763,9 @@
         if(state.bgIdx < 0) state.bgIdx = BACKGROUNDS.length - 1;
         if(state.bgIdx >= BACKGROUNDS.length) state.bgIdx = 0;
         document.getElementById('bgNameDisplay').innerText = BACKGROUNDS[state.bgIdx].name;
-        generateBackgroundObjects(); 
+        generateBackgroundObjects();
+        drawLobbyCanvas();
+        updateBackgroundPreview();
     };
 
     function startGame() {
@@ -374,10 +773,14 @@
         state.score = 0;
         state.level = 1;
         state.timeCur = 100;
+        state.sessionCoins = 0;
+        state.lastRecordId = null;
         updateDifficulty();
 
         document.getElementById('lobbyUI').classList.add('hidden');
         document.getElementById('gameOverUI').classList.add('hidden');
+        document.getElementById('nameInputModal').classList.add('hidden');
+        document.getElementById('leaderboardUI').classList.add('hidden');
         document.getElementById('gameUI').classList.remove('hidden');
 
         initGameData();
@@ -390,8 +793,10 @@
         player.vX = 0; player.vY = 0;
         player.dir = -1;
         camera.x = 0; camera.y = 0;
-        stairs = [{x: 0, y: 0, color: '#fff'}];
-        for(let i=1; i<=6; i++) stairs.push({x: -i, y: -i, color: getRandomColor()});
+        stairs = [{x: 0, y: 0, color: '#fff', hasCoin: false}];
+        coins = [];
+        
+        for(let i=1; i<=6; i++) stairs.push({x: -i, y: -i, color: getRandomColor(), hasCoin: false});
         for(let i=0; i<40; i++) addRandomStair();
     }
 
@@ -410,7 +815,18 @@
         const prev = stairs[stairs.length - 2];
         let dir = last.x - prev.x;
         if (Math.random() < 0.5) dir = -dir;
-        stairs.push({ x: last.x + dir, y: last.y - 1, color: getRandomColor() });
+        
+        const hasCoin = Math.random() < CONFIG.COIN.CHANCE;
+        stairs.push({ x: last.x + dir, y: last.y - 1, color: getRandomColor(), hasCoin: hasCoin });
+        
+        if(hasCoin) {
+            coins.push({
+                x: (last.x + dir) * CONFIG.STAIR.WIDTH,
+                y: (last.y - 1) * CONFIG.STAIR.HEIGHT,
+                stairIdx: stairs.length - 1,
+                collected: false
+            });
+        }
     }
 
     function generateBackgroundObjects() {
@@ -450,6 +866,59 @@
     }
 
     // ==========================================
+    // 프리뷰 업데이트
+    // ==========================================
+    function updateCharacterPreview() {
+        const preview = document.getElementById('charPreview');
+        const pctx = preview.getContext('2d');
+        pctx.clearRect(0, 0, 150, 150);
+        
+        pctx.save();
+        pctx.translate(75, 100);
+        pctx.scale(3, 3);
+        drawPlayerShape(pctx, CHARACTERS[state.charIdx].id, true);
+        pctx.restore();
+    }
+
+    function updateBackgroundPreview() {
+        const preview = document.getElementById('bgPreview');
+        const pctx = preview.getContext('2d');
+        
+        const bg = BACKGROUNDS[state.bgIdx];
+        const grad = pctx.createLinearGradient(0, 0, 0, 150);
+        grad.addColorStop(0, bg.top);
+        grad.addColorStop(1, bg.bot);
+        pctx.fillStyle = grad;
+        pctx.fillRect(0, 0, 150, 150);
+        
+        if(bg.id === 'NIGHT') {
+            pctx.fillStyle = '#1a2530';
+            pctx.fillRect(10, 80, 30, 70);
+            pctx.fillRect(50, 60, 40, 90);
+            pctx.fillRect(100, 90, 35, 60);
+            pctx.fillStyle = '#f9c74f';
+            for(let y=90; y<140; y+=10) {
+                for(let x=15; x<35; x+=10) {
+                    if(Math.random()>0.3) pctx.fillRect(x, y, 3, 4);
+                }
+            }
+        } else if(bg.id === 'SUNSET') {
+            pctx.fillStyle = '#ffd700';
+            pctx.beginPath();
+            pctx.arc(75, 75, 30, 0, Math.PI*2);
+            pctx.fill();
+        }
+        
+        pctx.fillStyle = 'rgba(255,255,255,0.6)';
+        pctx.beginPath();
+        pctx.arc(30, 30, 15, 0, Math.PI*2);
+        pctx.fill();
+        pctx.beginPath();
+        pctx.arc(110, 50, 20, 0, Math.PI*2);
+        pctx.fill();
+    }
+
+    // ==========================================
     // 게임 로직
     // ==========================================
     window.handleInput = function(action) {
@@ -472,8 +941,20 @@
             player.gX += player.dir;
             player.gY -= 1;
             state.score++;
+            
+            const currentStair = stairs[state.score];
+            if(currentStair.hasCoin) {
+                const coin = coins.find(c => c.stairIdx === state.score && !c.collected);
+                if(coin) {
+                    coin.collected = true;
+                    state.sessionCoins += CONFIG.COIN.VALUE;
+                    state.totalCoins += CONFIG.COIN.VALUE;
+                    saveTotalCoins();
+                }
+            }
+            
             state.timeCur = Math.min(100, state.timeCur + CONFIG.LEVEL.REFILL);
-            player.jumpY = 20; 
+            player.jumpY = 20;
             addRandomStair();
             if (state.score > 0 && state.score % CONFIG.LEVEL.STEPS === 0) levelUp();
             updateUI();
@@ -492,7 +973,16 @@
         state.status = 'GAMEOVER';
         document.getElementById('finalScore').innerText = state.score;
         document.getElementById('finalLevel').innerText = state.level;
+        document.getElementById('finalCoins').innerText = state.sessionCoins;
         document.getElementById('gameOverUI').classList.remove('hidden');
+        
+        // 신기록 체크
+        if (checkNewRecord(state.score, state.level, state.sessionCoins)) {
+            const rank = getRankPosition(state.score);
+            setTimeout(() => {
+                showNameInputModal(rank);
+            }, 1000);
+        }
     }
 
     document.addEventListener('keydown', (e) => {
@@ -500,13 +990,19 @@
             if (e.code === 'KeyZ' || e.code === 'ArrowLeft') handleInput('TURN');
             if (e.code === 'KeyX' || e.code === 'ArrowRight') handleInput('CLIMB');
         } else if (state.status === 'LOBBY' || state.status === 'GAMEOVER') {
-            if (e.code === 'Space' || e.code === 'Enter') startGame();
+            if (e.code === 'Space' || e.code === 'Enter') {
+                const modal = document.getElementById('nameInputModal');
+                if (modal.classList.contains('hidden')) {
+                    startGame();
+                }
+            }
         }
     });
 
     function updateUI() {
         document.getElementById('scoreDisplay').innerText = state.score;
         document.getElementById('levelDisplay').innerText = state.level;
+        document.getElementById('gameCoins').innerText = state.sessionCoins;
     }
 
     // ==========================================
@@ -548,7 +1044,7 @@
             camera.y += (player.vY - camera.y) * CONFIG.PLAYER.SPEED;
         } else if (state.status === 'GAMEOVER') {
             player.vX += (player.gX * CONFIG.STAIR.WIDTH - player.vX) * 0.1;
-            player.vY += 25; 
+            player.vY += 25;
         }
     }
 
@@ -571,7 +1067,7 @@
                 for(let w of b.wins) ctx.fillRect(w.x, w.y, 6, 8);
             }
         } else {
-             if(bg.id === 'SUNSET') {
+            if(bg.id === 'SUNSET') {
                 const sun = bgObjects.find(o=>o.type==='SUN');
                 if(sun) {
                     ctx.fillStyle = '#ffd700';
@@ -595,7 +1091,7 @@
         
         ctx.save();
         ctx.translate(canvas.width/2, canvas.height/2 + 50);
-        ctx.scale(2, 2); 
+        ctx.scale(2, 2);
         
         const bounce = Math.sin(Date.now() / 200) * 10;
         drawPlayer(0, -bounce - 50, true);
@@ -618,6 +1114,21 @@
             const sx = s.x * CONFIG.STAIR.WIDTH;
             const sy = s.y * CONFIG.STAIR.HEIGHT;
             drawStair(sx, sy, s.color, i === state.score);
+            
+            if(s.hasCoin) {
+                const coin = coins.find(c => c.stairIdx === i);
+                if(coin && !coin.collected) {
+                    const rotation = Date.now() / 200;
+                    ctx.save();
+                    ctx.translate(sx, sy - 20);
+                    ctx.rotate(rotation);
+                    ctx.fillStyle = '#ffd700';
+                    ctx.fillRect(-8, -8, 16, 16);
+                    ctx.fillStyle = '#ffed4e';
+                    ctx.fillRect(-6, -6, 12, 12);
+                    ctx.restore();
+                }
+            }
         }
 
         drawPlayer(player.vX, player.vY - player.jumpY, false);
@@ -644,44 +1155,51 @@
         ctx.scale(sc, sc);
         if (!isLobby && player.dir === 1) ctx.scale(-1, 1);
 
-        if (charType === 'MAN') {
-            ctx.fillStyle = '#000044'; 
-            if(!isLobby && player.jumpY > 5) { ctx.fillRect(-6,-10,6,8); ctx.fillRect(2,-14,6,8); }
-            else { ctx.fillRect(-6,-10,5,10); ctx.fillRect(1,-10,5,10); }
-
-            ctx.fillStyle = '#fff'; ctx.fillRect(-8,-24,16,14);
-            ctx.fillStyle = '#f00'; ctx.fillRect(-1,-24,2,10);
-            ctx.fillStyle = '#ffccaa'; ctx.fillRect(-7,-34,14,10);
-            ctx.fillStyle = '#000'; ctx.fillRect(-8,-38,16,6); ctx.fillRect(-8,-32,4,2); ctx.fillRect(4,-32,4,2);
-            ctx.fillStyle = '#8b4513'; ctx.fillRect(6,-20,8,6);
-        } 
-        else if (charType === 'RABBIT') {
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(-8, -20, 16, 15);
-            if(!isLobby && player.jumpY > 5) { ctx.fillRect(-6,-5,6,5); ctx.fillRect(2,-8,6,5); }
-            else { ctx.fillRect(-6,-5,5,8); ctx.fillRect(1,-5,5,8); }
-            ctx.fillRect(-10, -32, 20, 14);
-            ctx.fillStyle = '#ffcccc';
-            ctx.fillRect(-8, -42, 4, 10); ctx.fillRect(4, -42, 4, 10);
-            ctx.fillStyle = '#000'; ctx.fillRect(-6,-28,2,2); ctx.fillRect(4,-28,2,2);
-        }
-        else if (charType === 'DOG') {
-            ctx.fillStyle = '#d35400'; 
-            ctx.fillRect(-8, -18, 16, 12);
-            if(!isLobby && player.jumpY > 5) { ctx.fillRect(-6,-6,6,6); ctx.fillRect(2,-9,6,6); }
-            else { ctx.fillRect(-6,-6,5,8); ctx.fillRect(1,-6,5,8); }
-            ctx.fillRect(-9, -30, 18, 14);
-            ctx.fillRect(-8, -34, 4, 4); ctx.fillRect(4, -34, 4, 4);
-            ctx.fillStyle = '#fff'; ctx.fillRect(-7,-24,14,6);
-            ctx.fillStyle = '#000'; ctx.fillRect(-2,-22,4,3);
-            ctx.fillRect(-6,-27,2,2); ctx.fillRect(4,-27,2,2);
-        }
-
+        drawPlayerShape(ctx, charType, isLobby);
         ctx.restore();
     }
+
+    function drawPlayerShape(context, charType, isLobby) {
+        if (charType === 'MAN') {
+            context.fillStyle = '#000044';
+            if(!isLobby && player.jumpY > 5) { context.fillRect(-6,-10,6,8); context.fillRect(2,-14,6,8); }
+            else { context.fillRect(-6,-10,5,10); context.fillRect(1,-10,5,10); }
+
+            context.fillStyle = '#fff'; context.fillRect(-8,-24,16,14);
+            context.fillStyle = '#f00'; context.fillRect(-1,-24,2,10);
+            context.fillStyle = '#ffccaa'; context.fillRect(-7,-34,14,10);
+            context.fillStyle = '#000'; context.fillRect(-8,-38,16,6); context.fillRect(-8,-32,4,2); context.fillRect(4,-32,4,2);
+            context.fillStyle = '#8b4513'; context.fillRect(6,-20,8,6);
+        } 
+        else if (charType === 'RABBIT') {
+            context.fillStyle = '#fff';
+            context.fillRect(-8, -20, 16, 15);
+            if(!isLobby && player.jumpY > 5) { context.fillRect(-6,-5,6,5); context.fillRect(2,-8,6,5); }
+            else { context.fillRect(-6,-5,5,8); context.fillRect(1,-5,5,8); }
+            context.fillRect(-10, -32, 20, 14);
+            context.fillStyle = '#ffcccc';
+            context.fillRect(-8, -42, 4, 10); context.fillRect(4, -42, 4, 10);
+            context.fillStyle = '#000'; context.fillRect(-6,-28,2,2); context.fillRect(4,-28,2,2);
+        }
+        else if (charType === 'DOG') {
+            context.fillStyle = '#d35400';
+            context.fillRect(-8, -18, 16, 12);
+            if(!isLobby && player.jumpY > 5) { context.fillRect(-6,-6,6,6); context.fillRect(2,-9,6,6); }
+            else { context.fillRect(-6,-6,5,8); context.fillRect(1,-6,5,8); }
+            context.fillRect(-9, -30, 18, 14);
+            context.fillRect(-8, -34, 4, 4); context.fillRect(4, -34, 4, 4);
+            context.fillStyle = '#fff'; context.fillRect(-7,-24,14,6);
+            context.fillStyle = '#000'; context.fillRect(-2,-22,4,3);
+            context.fillRect(-6,-27,2,2); context.fillRect(4,-27,2,2);
+        }
+    }
     
+    // 초기화
+    loadSavedData();
     resize();
     generateBackgroundObjects();
+    updateCharacterPreview();
+    updateBackgroundPreview();
 </script>
 </body>
 </html>
