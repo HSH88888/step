@@ -985,7 +985,7 @@
         player.vX = 0; player.vY = 0;
         player.dir = -1;
         camera.x = 0; camera.y = 0;
-        stairs = [{x: 0, y: 0, color: '#fff', hasCoin: false}];
+        stairs = [{x: 0, y: 0, color: '#8B4513', hasCoin: false}];
         coins = [];
         
         for(let i=1; i<=6; i++) stairs.push({x: -i, y: -i, color: getRandomColor(), hasCoin: false});
@@ -1328,7 +1328,7 @@
     function drawStair(x, y, color, isCurrent) {
         const w = CONFIG.STAIR.WIDTH;
         const h = CONFIG.STAIR.HEIGHT;
-        ctx.fillStyle = isCurrent ? '#fff' : color;
+        ctx.fillStyle = isCurrent ? '#8B4513' : color;
         ctx.fillRect(x - w/2, y, w, h);
         ctx.lineWidth = 4; ctx.strokeStyle = '#000';
         ctx.strokeRect(x - w/2, y, w, h);
@@ -1393,5 +1393,6 @@
 </script>
 </body>
 </html>
+
 
 
